@@ -65,7 +65,7 @@ func Listen(
 	runtime.LockOSThread() // xxx: Not 100% confident this is enough
 	defer runtime.UnlockOSThread()
 
-	if err := os.Chdir("/mnt/scratch"); err != nil {
+	if err := os.Chdir(listenDir); err != nil {
 		return fmt.Errorf("chdir: %v", err)
 	}
 
