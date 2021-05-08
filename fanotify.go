@@ -14,6 +14,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"runtime"
 	"syscall"
 	"unsafe"
 
@@ -61,12 +62,19 @@ func Listen(
 	isFiltered func(path string) bool,
 	changeReceiver chan<- FileChange,
 ) error {
+	runtime.LockOSThread() // xxx: Not 100% confident this is enough
+	if err := os.Chdir("/mnt/scratch"); err != nil {
+		return fmt.Errorf("chdir: %v", err)
+	}
+
 	fan, err := unix.FanotifyInit(unix.FAN_REPORT_FID, 0)
 	if err != nil {
 		return fmt.Errorf("fanotifyinit: %v", err)
 	}
 
 	err = unix.FanotifyMark(fan, markFlags, markMask, unix.AT_FDCWD, listenDir)
+
+	runtime.UnlockOSThread()
 
 	if err != nil {
 		return fmt.Errorf("fanotifymark: %v", err)
