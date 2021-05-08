@@ -63,6 +63,8 @@ func Listen(
 	changeReceiver chan<- FileChange,
 ) error {
 	runtime.LockOSThread() // xxx: Not 100% confident this is enough
+	defer runtime.UnlockOSThread()
+
 	if err := os.Chdir("/mnt/scratch"); err != nil {
 		return fmt.Errorf("chdir: %v", err)
 	}
